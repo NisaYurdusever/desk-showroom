@@ -1,22 +1,20 @@
 # Desk Setup Showroom
 
-Interactive 3D desktop product showcase that runs in the browser (React Three Fiber).
+An interactive 3D desktop product showcase built with React Three Fiber.
 
-## What I did
-There's a lamp, laptop, phone, headphones, and a cat on the desk. Clicking on a product zooms in and opens the configurator panel:
-color, screen color, surface (matte/glossy/metal), laptop lid, lamp light. Day/night transition, wall color selection,
-there's a cat that follows the cursor and sleeps at night.
+The scene features a lamp, laptop, phone, headphones, and a cat. Clicking a product zooms in and opens its configurator panel, with options for color, screen color, surface finish, laptop lid, and lamp lighting. The scene also includes day/night and wall color controls. The cat follows the cursor and sleeps at night.
 
-## Performance note
-- No 3D models or textures are downloaded; geometry is generated in code. Environment lighting uses procedural light panels rather than an external HDR.
-- The app shell loads first; the 3D scene is a separate `React.lazy` chunk. Reduced-motion and low-power devices show a static preview until the visitor explicitly opts into 3D, so the scene chunk is not downloaded by default in that fallback.
-- Coarse-pointer devices start at DPR 1. `PerformanceMonitor` lowers quality after a frame-rate decline, reducing DPR and contact-shadow resolution.
-- The render loop remains active because the cat and laptop lid can animate. `frameloop="demand"` and baking the contact shadow would freeze those animations, so continuous rendering and dynamic shadows are an intentional quality/performance tradeoff.
-- Build bundle sizes: main JavaScript 222.68 KB (gzip 70.03 KB); lazy 3D scene chunk 1,030.68 KB (gzip 276.21 KB). These are build-output sizes, not transfer measurements from a deployed site.
-- Lighthouse and real-device FPS have not been measured yet. Measure with Chrome DevTools Lighthouse (Navigation) and the FPS counter on a physical desktop and phone; headless or GPU-less Lighthouse runs can overstate Total Blocking Time compared with GPU-backed browsing.
+## Performance
+- No model or texture files are used; all geometry is procedural (0 KB of models). Environment lighting is generated in code, with no external HDR download.
+- Initial JavaScript: 222.68 KB (70.03 KB gzip). The 3D scene (three.js, React Three Fiber, and drei) is lazy-loaded in a separate chunk: 1,030.76 KB (276.25 KB gzip). If reduced motion or low-power mode is detected, a static image is shown and the scene chunk is not downloaded unless the visitor opts into 3D.
+- DPR is capped at 1.5. Touch devices start at DPR 1, and `PerformanceMonitor` reduces DPR to 1 when frame rate declines. Contact-shadow resolution is reduced at the same time.
+- PageSpeed lab data (desktop, GPU-less): Performance and TBT not measured. Software-rendered WebGL can inflate TBT.
+- PageSpeed field data (small sample): desktop LCP 2.4 s / INP 67 ms; mobile LCP 3.5 s / INP 202 ms. Slow mobile FCP and TTFB are largely attributable to server and network conditions.
+- Known trade-off: the cat and laptop lid animate continuously, so `frameloop="demand"` and baked shadows are not used.
+- Known limitation: mobile INP is just above the 200 ms good threshold, and the 3D scene may still be demanding on low-powered phones.
 
 ## If I had more time
 - Tuning procedural environment lighting and testing metal-finish reflections on target devices
-- Add to cart stream and product information cards
+- Add-to-cart flow and product information cards
 - More animations for the cat (walking, stretching)
 - A real GLB product model and drag-and-drop upload

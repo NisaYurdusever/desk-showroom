@@ -8,7 +8,9 @@ import Headphones, { FINISH_NAMES } from "./Headphones";
 import Room from "./Room";
 import Cat from "./Cat";
 
-const HOME_VIEW = [2.5, 2, 3.5, 0, 0, 0];
+const aspect = window.innerWidth / window.innerHeight;
+const s = aspect < 1 ? Math.min(2.6, 1.1 / aspect) : 1;
+const HOME_VIEW = [2.5 * s, 2 * s, 3.5 * s, 0, 0, 0];
 
 const PRODUCTS = {
   laptop: {
@@ -194,7 +196,7 @@ export default function Scene() {
         ))}
 
         <ContactShadows position={[0, 0, 0]} opacity={0.4} blur={2.5} resolution={low ? 128 : 256} />
-        <CameraControls ref={controls} maxPolarAngle={Math.PI / 2.1} minDistance={1} maxDistance={8} />
+        <CameraControls ref={controls} maxPolarAngle={Math.PI / 2.1} minDistance={1} maxDistance={14} />
       </Canvas>
 
       <button
