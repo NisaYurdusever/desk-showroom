@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
 import { Canvas } from "@react-three/fiber";
-import { CameraControls, ContactShadows, Environment } from "@react-three/drei";
+import { CameraControls, ContactShadows, Environment, Lightformer, PerformanceMonitor } from "@react-three/drei";
 import Lamp from "./Lamp";
 import Phone from "./Phone";
 import Laptop from "./Laptop";
@@ -137,8 +137,10 @@ function Panel({ id, colors, screens, finish, setFinish, setColor, setScreen, on
 
 export default function Scene() {
   const controls = useRef();
+  const coarse = window.matchMedia("(pointer: coarse)").matches;
   const [selected, setSelected] = useState(null);
   const [night, setNight] = useState(false);
+  const [low, setLow] = useState(coarse);
   const [wall, setWall] = useState("#e8dccb");
   const [finish, setFinish] = useState("mat");
   const [lamp, setLamp] = useState({ on: true, intensity: 3, warm: true });
@@ -164,14 +166,19 @@ export default function Scene() {
   return (
     <div style={{ position: "fixed", inset: 0 }}>
       <Canvas
-        dpr={[1, 1.5]}
+        dpr={low ? 1 : [1, 1.5]}
         camera={{ position: HOME_VIEW.slice(0, 3), fov: 40 }}
         onPointerMissed={() => selected && select(null)}
       >
+        <PerformanceMonitor onDecline={() => setLow(true)} />
         <color attach="background" args={[night ? "#14161f" : "#f3ece4"]} />
         <ambientLight intensity={night ? 0.08 : 0.5} />
         <directionalLight position={[3, 5, 2]} intensity={night ? 0.05 : 1} />
-        <Environment preset="apartment" environmentIntensity={night ? 0.1 : 1} />
+        <Environment resolution={256} environmentIntensity={night ? 0.1 : 1}>
+          <Lightformer form="rect" intensity={2} position={[0, 5, -5]} scale={[10, 5, 1]} />
+          <Lightformer form="rect" intensity={1} position={[-5, 2, 3]} scale={[6, 4, 1]} />
+          <Lightformer form="ring" intensity={1.5} position={[4, 3, 2]} scale={4} />
+        </Environment>
         <Room night={night} wall={wall} />
 
         <mesh position={[0, -0.05, 0]}>
@@ -186,7 +193,7 @@ export default function Scene() {
           />
         ))}
 
-        <ContactShadows position={[0, 0, 0]} opacity={0.4} blur={2.5} />
+        <ContactShadows position={[0, 0, 0]} opacity={0.4} blur={2.5} resolution={low ? 128 : 256} />
         <CameraControls ref={controls} maxPolarAngle={Math.PI / 2.1} minDistance={1} maxDistance={8} />
       </Canvas>
 
